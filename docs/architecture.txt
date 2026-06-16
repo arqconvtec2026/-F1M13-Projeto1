@@ -1,0 +1,76 @@
+F1M13-Projeto1 — Arquitetura do Sistema
+========================================
+
+Sistema de Monitoramento Ambiental para Rastreamento de Medicamentos
+Módulo 1.3 — Redes de Computadores | Roadmap ACT — Fase 1
+
+
+VISÃO GERAL
+-----------
+
+  [sensor_temperatura.py]  ──┐
+                             │
+  [sensor_umidade.py]      ──┼──►  [Broker MQTT]  ──►  [dashboard.py]
+                             │     Mosquitto 2.1.x       Subscriber
+  [sensor_pressao.py]      ──┘     localhost:1883         + Anomaly
+     Publishers                                           Detection
+
+
+FLUXO DE DADOS
+--------------
+
+  Publisher                    Broker                   Subscriber
+  ─────────                    ──────                   ──────────
+  Gera leitura          ──►  Recebe msg           ──►  Recebe msg
+  Serializa JSON               Roteia por tópico        Desserializa JSON
+  Publica no tópico            Entrega ao subscriber    Verifica anomalia
+  Aguarda 2s                                            Exibe no terminal
+
+
+TÓPICOS MQTT
+------------
+
+  medicamentos/
+  └── lote/
+      └── A7/
+          ├── temperatura    (°C)   Publisher: sensor_temperatura.py
+          ├── umidade        (%RH)  Publisher: sensor_umidade.py
+          └── pressao        (hPa)  Publisher: sensor_pressao.py
+
+  Wildcard subscriber: medicamentos/lote/A7/#
+
+
+LIMITES OPERACIONAIS
+--------------------
+
+  Sensor        Mínimo     Máximo     Referência
+  ──────        ───────    ───────    ──────────
+  Temperatura    2.0°C      8.0°C     Medicamentos refrigerados
+  Umidade       30.0%RH    65.0%RH    Ambiente controlado
+  Pressão      980.0hPa  1030.0hPa    Pressão atmosférica padrão
+
+
+STACK TECNOLÓGICA
+-----------------
+
+  Camada           Tecnologia
+  ──────           ──────────
+  Protocolo        MQTT 3.1.1
+  Broker           Mosquitto 2.1.x
+  Clientes         Python 3.12 + paho-mqtt 2.1.0 (CallbackAPIVersion.VERSION2)
+  Ambiente         WSL Ubuntu (desenvolvimento local)
+  Transporte       TCP / localhost:1883 (sem TLS — fase de desenvolvimento)
+
+
+EXPANSÃO FUTURA (Roadmap ACT)
+-----------------------------
+
+  Fase 2 — IoT      : Substituir simuladores por ESP32 + DHT22 (hardware real)
+  Fase 2 — IA       : Isolation Forest para detecção de anomalias em séries temporais
+  Fase 2 — Web3     : Smart contract ERC-721 (Polygon Sepolia) para audit trail imutável
+  Fase 2 — Segurança: TLS/MQTT (porta 8883), autenticação JWT, OWASP IoT Top 10
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Alvo regulatório: ANVISA — Sistema de rastreamento e       │
+  │  verificação de integridade de medicamentos (RDC 430/2020)  │
+  └─────────────────────────────────────────────────────────────┘
