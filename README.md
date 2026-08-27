@@ -120,6 +120,54 @@ python3 sensors/sensor_pressao.py
 [19:17:09] OK — Lote A7 | pressao: 1012.40hPa
 ```
 
+## Executando via Docker
+
+Nossa aplicacao (broker + 3 sensores + dashboard) agora roda containerizado via docker-compose (nao precisa instalar Mosquitto ou Paho-mqtt localmente).
+
+## Pre-requisitos
+
+Docker Engine (desktop ou nativo WSL)
+
+Comandos:
+
+```bash
+docker compose up --build
+```
+
+```bash
+docker compose up -d --build
+```
+
+```bash
+docker compose logs -f dashboard
+```
+
+```bash
+docker compose logs -f sensor-temperatura
+```
+
+```bash
+docker compose down
+```
+
+## Rede
+
+Dentro da rede do compose, os serviços se enxergam pelo NOME DO SERVIÇO (ex: mosquitto), não por localhost.
+
+Os scripts leem BROKER_HOST via variável de ambiente com fallback pra localhost, permitindo rodar tanto local quanto em container sem mudar código.
+
+## Docker Desktop → Engine nativo
+
+Optamos por migrar a infraestrutura do Docker desktop para Engine nativo do WSL por conta da tentativa inicial com Docker Desktop + WSL falhar por erro de credential helper (docker-credential-desktop.exe incompatível com WSL).
+
+## Arquivos Docker
+
+```
+- `Dockerfile.publisher` — imagem genérica reaproveitada pelos 3 sensores (script definido via `command:` no compose)
+- `Dockerfile.dashboard` — imagem do subscriber, com script fixo via `CMD`
+- `docker-compose.yml` — orquestra os 5 serviços na rede `mqtt-net`
+```
+
 ## Próximos passos no roadmap ACT
 
 | Fase           | Expansão                                                          |
