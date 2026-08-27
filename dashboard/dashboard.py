@@ -1,8 +1,9 @@
 import paho.mqtt.client as mqtt
 import json
 import datetime
+import os
 
-BROKER = "localhost"
+BROKER = os.environ.get("BROKER_HOST", "localhost")
 PORT = 1883
 TOPICO_WILDCARD = "medicamentos/lote/A7/#"
 

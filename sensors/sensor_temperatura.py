@@ -2,8 +2,9 @@ import paho.mqtt.client as mqtt
 import json
 import time
 import random
+import os
 
-BROKER = "localhost"
+BROKER = os.environ.get("BROKER_HOST", "localhost")
 PORT = 1883
 TOPICO = "medicamentos/lote/A7/temperatura"
 
