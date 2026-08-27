@@ -1,0 +1,66 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    networks:
+      - mqtt-net
+  
+  sensor-temperatura:
+    build:
+      context: .
+      dockerfile: Dockerfile.publisher
+    container_name: sensor-temperatura
+    command: ["python", "sensors/sensor_temperatura.py"]
+    depends_on:
+      - mosquitto
+    environment:
+      - BROKER_HOST=mosquitto
+    networks:
+      - mqtt-net
+
+  sensor-umidade:
+    build:
+      context: .
+      dockerfile: Dockerfile.publisher
+    container_name: sensor-umidade
+    command: ["python", "sensors/sensor_umidade.py"]
+    depends_on:
+      - mosquitto
+    environment:
+      - BROKER_HOST=mosquitto
+    networks:
+      - mqtt-net
+
+  sensor-pressao:
+    build:
+      context: .
+      dockerfile: Dockerfile.publisher
+    container_name: sensor-pressao
+    command: ["python", "sensors/sensor_pressao.py"]
+    depends_on:
+      - mosquitto
+    environment:
+      - BROKER_HOST=mosquitto
+    networks:
+      - mqtt-net
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: dashboard
+    depends_on:
+      - mosquitto
+    environment:
+      - BROKER_HOST=mosquitto
+    networks:
+      - mqtt-net
+
+networks:
+  mqtt-net:
+    driver: bridge
+
